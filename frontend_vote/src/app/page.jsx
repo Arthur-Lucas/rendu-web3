@@ -186,32 +186,32 @@ export default function Home() {
                   }
                 />
               </h1>
-              {resultats.length > 0 && <PieChartResults results={resultats} />}
-              {hasVoted && (
-                <p className="text-lg mb-6">
-                  Vous avez déjà voté ! Merci de votre participation.
-                </p>
+        {console.log(hasVoted, bNeedReset)}
+              {(hasVoted || bNeedReset) && <PieChartResults results={resultats} />}
+              {!hasVoted && (
+                <div className="flex flex-col sm:flex-row gap-4 w-full">
+                  {candidats.map((candidat) => (
+                    <button
+                      key={candidat}
+                      onClick={() => vote(candidat)}
+                      disabled={hasVoted}
+                      className="flex-1 bg-[#0f172a] text-white border border-white/10 px-5 py-3 rounded-lg hover:bg-white hover:text-black transition cursor-pointer"
+                    >
+                      {candidat}
+                    </button>
+                  ))}
+                </div>
               )}
-              <div className="flex flex-col sm:flex-row gap-4 w-full">
-                {candidats.map((candidat) => (
+              {hasVoted && (
+                <div>
                   <button
-                    key={candidat}
-                    onClick={() => vote(candidat)}
-                    disabled={hasVoted}
-                    className="flex-1 bg-[#0f172a] text-white border border-white/10 px-5 py-3 rounded-lg hover:bg-white hover:text-black transition cursor-pointer"
+                    onClick={getResults}
+                    className="bg-white mt-6 text-black text-lg font-medium px-6 py-3 rounded-xl hover:bg-gray-100 transition cursor-pointer"
                   >
-                    {candidat}
+                    Voir les résultats
                   </button>
-                ))}
-              </div>
-              <div>
-                <button
-                  onClick={getResults}
-                  className="bg-white mt-6 text-black text-lg font-medium px-6 py-3 rounded-xl hover:bg-gray-100 transition cursor-pointer"
-                >
-                  Voir les résultats
-                </button>
-              </div>
+                </div>
+              )}
               {bNeedReset && (
                 <div>
                   <button

@@ -57,6 +57,7 @@ export default function Home() {
           console.error("Erreur récupération candidats :", error);
         }
       })();
+      hasAlreadyVoted();
       isMaxVotesReachedAndVotesEqual();
     }
   }, [isConnected]);
@@ -68,6 +69,7 @@ export default function Home() {
     }
     try {
       const hasVoted = await contractRef.value.hasAlreadyVoted();
+      getResults();
       setHasVoted(hasVoted);
     } catch (error) {
       console.error("Erreur vérification vote :", error);
@@ -180,14 +182,21 @@ export default function Home() {
                 <WordWrapper
                   letterWrapper={true}
                   title={
-                    resultats.length > 0
+                    hasVoted || bNeedReset
                       ? "Résultats du vote"
                       : "Votez pour votre candidat !"
                   }
                 />
               </h1>
-        {console.log(hasVoted, bNeedReset)}
-              {(hasVoted || bNeedReset) && <PieChartResults results={resultats} />}
+              {bNeedReset && (
+                <h2 className="text-2xl mb-4">
+                  Tout les votes ont été fait, une égalité a eu lieu. Il faut
+                  recommencer les votes.
+                </h2>
+              )}
+              {(hasVoted || bNeedReset) && (
+                <PieChartResults results={resultats} />
+              )}
               {!hasVoted && (
                 <div className="flex flex-col sm:flex-row gap-4 w-full">
                   {candidats.map((candidat) => (
@@ -202,21 +211,11 @@ export default function Home() {
                   ))}
                 </div>
               )}
-              {hasVoted && (
-                <div>
-                  <button
-                    onClick={getResults}
-                    className="bg-white mt-6 text-black text-lg font-medium px-6 py-3 rounded-xl hover:bg-gray-100 transition cursor-pointer"
-                  >
-                    Voir les résultats
-                  </button>
-                </div>
-              )}
               {bNeedReset && (
                 <div>
                   <button
                     onClick={resetVote}
-                    className="mt-4 bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-600 transition"
+                    className="mt-4 bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-600 transition  cursor-pointer"
                   >
                     Reset les votes
                   </button>

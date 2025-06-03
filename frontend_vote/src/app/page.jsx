@@ -9,7 +9,7 @@ import PieChartResults from "./components/PieChartsResults";
 
 export default function Home() {
   const [isConnected, setIsConnected] = useState(false);
-  const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+  const contractAddress = "0x1EaF8cA1241bb6e9910497949e792145e0E86d95";
   const [candidats, setCandidats] = useState([]);
   const [bNeedReset, setbNeedReset] = useState(false);
 

@@ -124,7 +124,7 @@ export default function Home() {
             </h1>
             <button
               onClick={connectWallet}
-              className="bg-white text-black text-lg font-medium px-6 py-3 rounded-xl hover:bg-gray-100 transition"
+              className="bg-white text-black text-lg font-medium px-6 py-3 rounded-xl hover:bg-gray-100 transition cursor-pointer"
             >
               S'inscrire
             </button>
@@ -152,7 +152,7 @@ export default function Home() {
                         <button
                           key={candidat}
                           onClick={() => vote(candidat).then(() => setHasVotedOrViewed(true))}
-                          className="flex-1 bg-[#0f172a] text-white border border-white/10 px-5 py-3 rounded-lg hover:bg-white hover:text-black transition"
+                          className="flex-1 bg-[#0f172a] text-white border border-white/10 px-5 py-3 rounded-lg hover:bg-white hover:text-black transition cursor-pointer"
                         >
                           {candidat}
                         </button>
@@ -162,7 +162,7 @@ export default function Home() {
                   <div>
                     <button
                       onClick={getResults}
-                      className="bg-white mt-6 text-black text-lg font-medium px-6 py-3 rounded-xl hover:bg-gray-100 transition"
+                      className="bg-white mt-6 text-black text-lg font-medium px-6 py-3 rounded-xl hover:bg-gray-100 transition cursor-pointer"
                     >
                       Voir les résultats
                     </button>

@@ -12,7 +12,7 @@ export default function PieChartResults({ results }) {
 
   return (
     <div className="flex justify-center">
-      <PieChart width={300} height={300}>
+      <PieChart width={400} height={300}>
         <Pie
           data={data}
           cx="50%"

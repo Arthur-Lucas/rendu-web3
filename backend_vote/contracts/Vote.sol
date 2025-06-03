@@ -24,6 +24,14 @@ contract Vote {
         candidates[candidateIndex].voteCount += 1;
     }
 
+    function getCandidates() public view returns (string[] memory) {
+        string[] memory names = new string[](candidates.length);
+        for (uint i = 0; i < candidates.length; i++) {
+            names[i] = candidates[i].name;
+        }
+        return names;
+    }
+
     function getResults() public view returns (string[] memory names, uint[] memory voteCounts) {
         uint len = candidates.length;
         names = new string[](len);

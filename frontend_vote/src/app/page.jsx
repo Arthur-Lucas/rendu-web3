@@ -5,17 +5,20 @@ import { Contract, BrowserProvider } from "ethers";
 import ShapeCanvas from "./components/shapeCanvas";
 import { WordWrapper } from "./utils/wordWrapper";
 import VoteABI from "@/abis/Vote.json";
+import PieChartResults from "./components/PieChartsResults";
 
 export default function Home() {
   const [isConnected, setIsConnected] = useState(false);
   const choices = ["Alice", "Bob"];
   const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
   const [candidats, setCandidats] = useState([]);
+  const [hasVotedOrViewed, setHasVotedOrViewed] = useState(false);
+
 
   const providerRef = useRef(null);
   // const signerRef = useRef(null);
   const contractRef = useRef(null);
-  const resultats = useRef(null);
+  const [resultats, setResultats] = useState([]);
 
   async function connectWallet() {
     if (window.ethereum) {
@@ -71,14 +74,17 @@ export default function Home() {
       const noms = resultatsVote[0];
       const votes = resultatsVote[1];
 
-      for (let i = 0; i < noms.length; i++) {
-        if (i === 0) {
-          resultats.value = [];
-        }
-        resultats.value.push({ nom: noms[i], votes: votes[i].toString() });
-      }
+      const resultsArray = noms.map((nom, i) => ({
+        nom,
+        votes: votes[i].toString(),
+      }));
 
-      console.log("Résultats :", resultats.value);
+      setResultats(resultsArray);
+      setHasVotedOrViewed(true);
+
+      setHasVotedOrViewed(true);
+
+      console.log("Résultats :", resultsArray);
     } catch (error) {
       console.error("Erreur lecture votes :", error);
     }
@@ -111,38 +117,61 @@ export default function Home() {
       <div className="h-full z-10 text-white flex items-center justify-center p-6 sm:p-12">
         <main className="flex flex-col justify-center items-center gap-10 max-w-xl w-full text-center">
 
-          {!isConnected ? (
-            <div>
-                <h1 className="text-3xl sm:text-5xl font-semibold tracking-tight mb-8">
-                <WordWrapper letterWrapper={true} title="Inscrivez vous pour voter" /></h1>
-              <button
-                onClick={connectWallet}
-                className="bg-white text-black text-lg font-medium px-6 py-3 rounded-xl hover:bg-gray-100 transition"
-              >
-                S'inscrire
-              </button>
-            </div>
+        {!isConnected ? (
+          <div>
+            <h1 className="text-3xl sm:text-5xl font-semibold tracking-tight mb-8">
+              <WordWrapper letterWrapper={true} title="Inscrivez vous pour voter" />
+            </h1>
+            <button
+              onClick={connectWallet}
+              className="bg-white text-black text-lg font-medium px-6 py-3 rounded-xl hover:bg-gray-100 transition"
+            >
+              S'inscrire
+            </button>
+          </div>
           ) : (
             <div>
               <h1 className="text-3xl sm:text-5xl font-semibold tracking-tight mb-8 overflow-hidden">
-                <WordWrapper letterWrapper={true} title="Votez pour votre candidat !" />
+                <WordWrapper
+                  letterWrapper={true}
+                  title={
+                    resultats.length > 0
+                      ? "Résultats du vote"
+                      : "Votez pour votre candidat !"
+                  }
+                />
               </h1>
-              <div className="flex flex-col sm:flex-row gap-4 w-full">
-                {candidats.map((candidat) => (
-                  <button
-                    key={candidat}
-                    onClick={() => vote(candidat)}
-                    className="flex-1 bg-[#0f172a] text-white border border-white/10 px-5 py-3 rounded-lg hover:bg-white hover:text-black transition"
-                  >
-                    {candidat}
-                  </button>
-                ))}
-              </div>
-              <div>
-                <button onClick={getResults}>Voir les résultats</button>
-              </div>
+
+              {resultats.length > 0 ? (
+                <PieChartResults results={resultats} />
+              ) : (
+                <>
+                  {!hasVotedOrViewed && (
+                    <div className="flex flex-col sm:flex-row gap-4 w-full">
+                      {candidats.map((candidat) => (
+                        <button
+                          key={candidat}
+                          onClick={() => vote(candidat).then(() => setHasVotedOrViewed(true))}
+                          className="flex-1 bg-[#0f172a] text-white border border-white/10 px-5 py-3 rounded-lg hover:bg-white hover:text-black transition"
+                        >
+                          {candidat}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <div>
+                    <button
+                      onClick={getResults}
+                      className="bg-white mt-6 text-black text-lg font-medium px-6 py-3 rounded-xl hover:bg-gray-100 transition"
+                    >
+                      Voir les résultats
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           )}
+
         </main>
       </div>
       <footer className="text-sm text-gray-400 py-10 z-10 flex flex-col items-center">

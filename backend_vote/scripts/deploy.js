@@ -2,11 +2,7 @@ import hre from "hardhat";
 
 async function main() {
   const Vote = await hre.ethers.getContractFactory("Vote");
-  const voteInstance = await Vote.deploy([
-    "Candidat 1",
-    "Candidat 2",
-    "Candidat 3",
-  ]);
+  const voteInstance = await Vote.deploy(["Alice", "Bob", "Henri"]);
 
   await voteInstance.waitForDeployment();
   const [owner] = await hre.ethers.getSigners();

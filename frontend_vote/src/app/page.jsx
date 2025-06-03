@@ -198,18 +198,23 @@ export default function Home() {
                 <PieChartResults results={resultats} />
               )}
               {!hasVoted && (
-                <div className="flex flex-col sm:flex-row gap-4 w-full">
-                  {candidats.map((candidat) => (
-                    <button
-                      key={candidat}
-                      onClick={() => vote(candidat)}
-                      disabled={hasVoted}
-                      className="flex-1 bg-[#0f172a] text-white border border-white/10 px-5 py-3 rounded-lg hover:bg-white hover:text-black transition cursor-pointer"
-                    >
-                      {candidat}
-                    </button>
-                  ))}
-                </div>
+                <>
+                  <h2 className="text-2xl mb-4">
+                    Les éléctions seront cloturés apres 2 votes.
+                  </h2>
+                  <div className="flex flex-col sm:flex-row gap-4 w-full">
+                    {candidats.map((candidat) => (
+                      <button
+                        key={candidat}
+                        onClick={() => vote(candidat)}
+                        disabled={hasVoted}
+                        className="flex-1 bg-[#0f172a] text-white border border-white/10 px-5 py-3 rounded-lg hover:bg-white hover:text-black transition cursor-pointer"
+                      >
+                        {candidat}
+                      </button>
+                    ))}
+                  </div>
+                </>
               )}
               {bNeedReset && (
                 <div>

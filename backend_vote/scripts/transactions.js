@@ -7,9 +7,6 @@ async function main() {
 
   const [owner, wallet2, wallet3] = await hre.ethers.getSigners();
 
-  // const tx = await voteAdresse.connect(owner).vote(0);
-  // await tx.wait();
-
   const resultat = await voteAdresse.getResults();
   const noms = resultat[0];
   const votes = resultat[1];

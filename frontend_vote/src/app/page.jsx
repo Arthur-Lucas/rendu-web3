@@ -9,14 +9,11 @@ import PieChartResults from "./components/PieChartsResults";
 
 export default function Home() {
   const [isConnected, setIsConnected] = useState(false);
-  const choices = ["Alice", "Bob"];
   const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
   const [candidats, setCandidats] = useState([]);
-  const [hasVotedOrViewed, setHasVotedOrViewed] = useState(false);
-
+  const [bNeedReset, setbNeedReset] = useState(false);
 
   const providerRef = useRef(null);
-  // const signerRef = useRef(null);
   const contractRef = useRef(null);
   const [resultats, setResultats] = useState([]);
 
@@ -59,12 +56,26 @@ export default function Home() {
           console.error("Erreur récupération candidats :", error);
         }
       })();
+      isMaxVotesReachedAndVotesEqual();
     }
   }, [isConnected]);
 
-  async function getResults() {
-    console.log(contractRef.value);
+  async function hasAlreadyVoted() {
+    if (!contractRef.value) {
+      alert("Connecte toi");
+      return;
+    }
+    try {
+      const hasVoted = await contractRef.value.hasAlreadyVoted();
+      return hasVoted;
+    } catch (error) {
+      console.error("Erreur vérification vote :", error);
+      // alert("Erreur lors de la vérification du vote");
+      return false;
+    }
+  }
 
+  async function getResults() {
     if (!contractRef.value) {
       alert("Connecte toi");
       return;
@@ -98,6 +109,8 @@ export default function Home() {
     try {
       const tx = await contractRef.value.voteByName(candidatName);
       await tx.wait();
+
+      isMaxVotesReachedAndVotesEqual();
       console.log(`Vote pour le candidat ${candidatName} enregistré`);
     } catch (error) {
       if (error.reason) {
@@ -107,6 +120,37 @@ export default function Home() {
       } else {
         alert("Erreur lors du vote");
       }
+    }
+  }
+
+  async function resetVote() {
+    if (!contractRef.value) {
+      alert("Connecte toi");
+      return;
+    }
+    try {
+      const tx = await contractRef.value.resetVotes();
+      await tx.wait();
+      console.log("Votes réinitialisés");
+      setbNeedReset(false);
+      resultats.value = [];
+    } catch (error) {
+      console.error("Erreur réinitialisation votes :", error);
+      alert("Erreur lors de la réinitialisation des votes");
+    }
+  }
+
+  async function isMaxVotesReachedAndVotesEqual() {
+    if (!contractRef.value) {
+      alert("Connecte toi");
+      return;
+    }
+    try {
+      const infoResultat = await contractRef.value.isEqual();
+      setbNeedReset(infoResultat);
+    } catch (error) {
+      console.error("Erreur vérification votes :", error);
+      alert("Erreur lors de la vérification des votes");
     }
   }
 
@@ -141,33 +185,43 @@ export default function Home() {
                   }
                 />
               </h1>
-
-              {resultats.length > 0 ? (
+              {resultats.length > 0 && (
                 <PieChartResults results={resultats} />
-              ) : (
-                <>
-                  {!hasVotedOrViewed && (
-                    <div className="flex flex-col sm:flex-row gap-4 w-full">
-                      {candidats.map((candidat) => (
-                        <button
-                          key={candidat}
-                          onClick={() => vote(candidat).then(() => setHasVotedOrViewed(true))}
-                          className="flex-1 bg-[#0f172a] text-white border border-white/10 px-5 py-3 rounded-lg hover:bg-white hover:text-black transition cursor-pointer"
-                        >
-                          {candidat}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  <div>
-                    <button
-                      onClick={getResults}
-                      className="bg-white mt-6 text-black text-lg font-medium px-6 py-3 rounded-xl hover:bg-gray-100 transition cursor-pointer"
-                    >
-                      Voir les résultats
-                    </button>
-                  </div>
-                </>
+              )}
+              {hasAlreadyVoted() && (
+                <p className="text-lg mb-6">
+                  Vous avez déjà voté ! Merci de votre participation.
+                </p>
+              )}
+              <div className="flex flex-col sm:flex-row gap-4 w-full">
+                {candidats.map((candidat) => (
+                  <button
+                    key={candidat}
+                    onClick={() => vote(candidat)}
+                    disabled={hasAlreadyVoted()}
+                    className="flex-1 bg-[#0f172a] text-white border border-white/10 px-5 py-3 rounded-lg hover:bg-white hover:text-black transition cursor-pointer"
+                  >
+                    {candidat}
+                  </button>
+                ))}
+              </div>
+              <div>
+                <button
+                  onClick={getResults}
+                  className="bg-white mt-6 text-black text-lg font-medium px-6 py-3 rounded-xl hover:bg-gray-100 transition cursor-pointer"
+                >
+                  Voir les résultats
+                </button>
+              </div>
+              {bNeedReset && (
+                <div>
+                  <button
+                    onClick={resetVote}
+                    className="mt-4 bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-600 transition"
+                  >
+                    Reset les votes
+                  </button>
+                </div>
               )}
             </div>
           )}
@@ -176,7 +230,20 @@ export default function Home() {
       </div>
       <footer className="text-sm text-gray-400 py-10 z-10 flex flex-col items-center">
         <p>Votez pour votre candidat préféré !</p>
-        <p>Powered by <a className="link" href="https://github.com/Arthur-Lucas">Arthurito</a> , <a className="link" href="https://github.com/matdn">Matou</a>  & <a className="link" href="https://github.com/Pierrooooo">Pierro(t)</a> </p>
+        <p>
+          Powered by{" "}
+          <a className="link" href="https://github.com/Arthur-Lucas">
+            Arthurito
+          </a>{" "}
+          ,{" "}
+          <a className="link" href="https://github.com/matdn">
+            Matou
+          </a>{" "}
+          &{" "}
+          <a className="link" href="https://github.com/Pierrooooo">
+            Pierro(t)
+          </a>{" "}
+        </p>
       </footer>
     </div>
   );

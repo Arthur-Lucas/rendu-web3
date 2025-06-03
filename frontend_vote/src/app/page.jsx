@@ -16,6 +16,7 @@ export default function Home() {
   const providerRef = useRef(null);
   const contractRef = useRef(null);
   const [resultats, setResultats] = useState([]);
+  const [hasVoted, setHasVoted] = useState(false);
 
   async function connectWallet() {
     if (window.ethereum) {
@@ -67,10 +68,9 @@ export default function Home() {
     }
     try {
       const hasVoted = await contractRef.value.hasAlreadyVoted();
-      return hasVoted;
+      setHasVoted(hasVoted);
     } catch (error) {
       console.error("Erreur vérification vote :", error);
-      // alert("Erreur lors de la vérification du vote");
       return false;
     }
   }
@@ -91,9 +91,6 @@ export default function Home() {
       }));
 
       setResultats(resultsArray);
-      setHasVotedOrViewed(true);
-
-      setHasVotedOrViewed(true);
 
       console.log("Résultats :", resultsArray);
     } catch (error) {
@@ -109,7 +106,7 @@ export default function Home() {
     try {
       const tx = await contractRef.value.voteByName(candidatName);
       await tx.wait();
-
+      hasAlreadyVoted();
       isMaxVotesReachedAndVotesEqual();
       console.log(`Vote pour le candidat ${candidatName} enregistré`);
     } catch (error) {
@@ -132,6 +129,8 @@ export default function Home() {
       const tx = await contractRef.value.resetVotes();
       await tx.wait();
       console.log("Votes réinitialisés");
+      hasAlreadyVoted();
+      getResults();
       setbNeedReset(false);
       resultats.value = [];
     } catch (error) {
@@ -160,19 +159,21 @@ export default function Home() {
       <ShapeCanvas className="absolute z-1 pointer-events-none filter blur-[20px] opacity-[0.7]" />
       <div className="h-full z-10 text-white flex items-center justify-center p-6 sm:p-12">
         <main className="flex flex-col justify-center items-center gap-10 max-w-xl w-full text-center">
-
-        {!isConnected ? (
-          <div>
-            <h1 className="text-3xl sm:text-5xl font-semibold tracking-tight mb-8">
-              <WordWrapper letterWrapper={true} title="Inscrivez vous pour voter" />
-            </h1>
-            <button
-              onClick={connectWallet}
-              className="bg-white text-black text-lg font-medium px-6 py-3 rounded-xl hover:bg-gray-100 transition cursor-pointer"
-            >
-              S'inscrire
-            </button>
-          </div>
+          {!isConnected ? (
+            <div>
+              <h1 className="text-3xl sm:text-5xl font-semibold tracking-tight mb-8">
+                <WordWrapper
+                  letterWrapper={true}
+                  title="Inscrivez vous pour voter"
+                />
+              </h1>
+              <button
+                onClick={connectWallet}
+                className="bg-white text-black text-lg font-medium px-6 py-3 rounded-xl hover:bg-gray-100 transition cursor-pointer"
+              >
+                S'inscrire
+              </button>
+            </div>
           ) : (
             <div>
               <h1 className="text-3xl sm:text-5xl font-semibold tracking-tight mb-8 overflow-hidden">
@@ -185,10 +186,8 @@ export default function Home() {
                   }
                 />
               </h1>
-              {resultats.length > 0 && (
-                <PieChartResults results={resultats} />
-              )}
-              {hasAlreadyVoted() && (
+              {resultats.length > 0 && <PieChartResults results={resultats} />}
+              {hasVoted && (
                 <p className="text-lg mb-6">
                   Vous avez déjà voté ! Merci de votre participation.
                 </p>
@@ -198,7 +197,7 @@ export default function Home() {
                   <button
                     key={candidat}
                     onClick={() => vote(candidat)}
-                    disabled={hasAlreadyVoted()}
+                    disabled={hasVoted}
                     className="flex-1 bg-[#0f172a] text-white border border-white/10 px-5 py-3 rounded-lg hover:bg-white hover:text-black transition cursor-pointer"
                   >
                     {candidat}
@@ -225,7 +224,6 @@ export default function Home() {
               )}
             </div>
           )}
-
         </main>
       </div>
       <footer className="text-sm text-gray-400 py-10 z-10 flex flex-col items-center">

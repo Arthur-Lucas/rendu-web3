@@ -7,29 +7,37 @@ contract Vote {
         uint voteCount;
     }
 
-    mapping(uint => Candidate) public candidates;
+    Candidate[] public candidates;
     mapping(address => bool) public hasVoted;
-    uint public candidatesCount;
 
-    event Voted(address indexed voter, uint indexed candidateId);
-
-    constructor() {
-        addCandidate("Alice");
-        addCandidate("Bob");
+    constructor(string[] memory candidateNames) {
+        for (uint i = 0; i < candidateNames.length; i++) {
+            candidates.push(Candidate(candidateNames[i], 0));
+        }
     }
 
-    function addCandidate(string memory _name) private {
-        candidates[candidatesCount] = Candidate(_name, 0);
-        candidatesCount++;
-    }
-
-    function vote(uint _candidateId) public {
-        require(!hasVoted[msg.sender], "You have already voted.");
-        require(_candidateId < candidatesCount, "Invalid candidate ID.");
+    function vote(uint candidateIndex) public {
+        require(!hasVoted[msg.sender], "Vous avez deja vote.");
+        require(candidateIndex < candidates.length, "Le candidat n'existe pas.");
 
         hasVoted[msg.sender] = true;
-        candidates[_candidateId].voteCount++;
+        candidates[candidateIndex].voteCount += 1;
+    }
 
-        emit Voted(msg.sender, _candidateId);
+    function getResults() public view returns (string[] memory names, uint[] memory voteCounts) {
+        uint len = candidates.length;
+        names = new string[](len);
+        voteCounts = new uint[](len);
+
+        for (uint i = 0; i < len; i++) {
+            names[i] = candidates[i].name;
+            voteCounts[i] = candidates[i].voteCount;
+        }
+
+        return (names, voteCounts);
+    }
+
+    function getCandidateCount() public view returns (uint) {
+        return candidates.length;
     }
 }

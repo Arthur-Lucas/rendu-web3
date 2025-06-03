@@ -1,14 +1,19 @@
 import hre from "hardhat";
 
 async function main() {
-  const Safe = await hre.ethers.getContractFactory("Safe");
-  const safeInstance = await Safe.deploy();
+  const Vote = await hre.ethers.getContractFactory("Vote");
+  const voteInstance = await Vote.deploy([
+    "Candidat 1",
+    "Candidat 2",
+    "Candidat 3",
+  ]);
 
-  await safeInstance.waitForDeployment();
+  await voteInstance.waitForDeployment();
   const [owner] = await hre.ethers.getSigners();
-  const contractAddress = await safeInstance.getAddress();
-  console.log("Safe contract deployed at:", contractAddress);
-  console.log("Safe deployed to:", owner.address);
+  console.log("Deploying contract with address:", owner.address);
+
+  const contractAddress = await voteInstance.getAddress();
+  console.log(`✅ Contract deployed at: ${contractAddress}`);
 }
 
 main().catch((error) => {

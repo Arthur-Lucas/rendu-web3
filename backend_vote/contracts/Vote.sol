@@ -16,8 +16,16 @@ contract Vote {
         }
     }
 
-    function vote(uint candidateIndex) public {
+    function voteByName(string memory candidateName) public {
         require(!hasVoted[msg.sender], "Vous avez deja vote.");
+
+        uint candidateIndex = candidates.length;
+        for (uint i = 0; i < candidates.length; i++) {
+            if (keccak256(bytes(candidates[i].name)) == keccak256(bytes(candidateName))) {
+                candidateIndex = i;
+                break;
+            }
+        }
         require(candidateIndex < candidates.length, "Le candidat n'existe pas.");
 
         hasVoted[msg.sender] = true;

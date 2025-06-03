@@ -13,7 +13,7 @@ export default function Home() {
   const providerRef = useRef(null);
   // const signerRef = useRef(null);
   const contractRef = useRef(null);
-  const resultatsRef = useRef(null);
+  const resultats = useRef(null);
 
   async function connectWallet() {
     if (window.ethereum) {
@@ -65,20 +65,40 @@ export default function Home() {
       return;
     }
     try {
-      const resultats = await contractRef.value.getResults();
-      const noms = resultats[0];
-      const votes = resultats[1];
+      const resultatsVote = await contractRef.value.getResults();
+      const noms = resultatsVote[0];
+      const votes = resultatsVote[1];
 
       for (let i = 0; i < noms.length; i++) {
-        resultatsRef.current = [
-          ...(resultatsRef.current || []),
-          { nom: noms[i], votes: votes[i].toString() },
-        ];
+        if (i === 0) {
+          resultats.value = [];
+        }
+        resultats.value.push({ nom: noms[i], votes: votes[i].toString() });
       }
 
-      console.log("Résultats :", resultatsRef.current);
+      console.log("Résultats :", resultats.value);
     } catch (error) {
       console.error("Erreur lecture votes :", error);
+    }
+  }
+
+  async function vote(candidatName) {
+    if (!contractRef.value) {
+      alert("Connecte toi");
+      return;
+    }
+    try {
+      const tx = await contractRef.value.voteByName(candidatName);
+      await tx.wait();
+      console.log(`Vote pour le candidat ${candidatName} enregistré`);
+    } catch (error) {
+      if (error.reason) {
+        alert(error.reason);
+      } else if (error.data && error.data.message) {
+        alert(error.data.message);
+      } else {
+        alert("Erreur lors du vote");
+      }
     }
   }
 
@@ -109,6 +129,7 @@ export default function Home() {
                 {candidats.map((candidat) => (
                   <button
                     key={candidat}
+                    onClick={() => vote(candidat)}
                     className="flex-1 bg-[#0f172a] text-white border border-white/10 px-5 py-3 rounded-lg hover:bg-white hover:text-black transition"
                   >
                     {candidat}

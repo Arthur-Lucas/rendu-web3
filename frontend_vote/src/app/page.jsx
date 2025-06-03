@@ -57,6 +57,7 @@ export default function Home() {
           console.error("Erreur récupération candidats :", error);
         }
       })();
+      hasAlreadyVoted();
       isMaxVotesReachedAndVotesEqual();
     }
   }, [isConnected]);
@@ -68,6 +69,7 @@ export default function Home() {
     }
     try {
       const hasVoted = await contractRef.value.hasAlreadyVoted();
+      getResults();
       setHasVoted(hasVoted);
     } catch (error) {
       console.error("Erreur vérification vote :", error);
@@ -180,43 +182,45 @@ export default function Home() {
                 <WordWrapper
                   letterWrapper={true}
                   title={
-                    resultats.length > 0
+                    hasVoted || bNeedReset
                       ? "Résultats du vote"
                       : "Votez pour votre candidat !"
                   }
                 />
               </h1>
-              {resultats.length > 0 && <PieChartResults results={resultats} />}
-              {hasVoted && (
-                <p className="text-lg mb-6">
-                  Vous avez déjà voté ! Merci de votre participation.
-                </p>
+              {bNeedReset && (
+                <h2 className="text-2xl mb-4">
+                  Tout les votes ont été fait, une égalité a eu lieu. Il faut
+                  recommencer les votes.
+                </h2>
               )}
-              <div className="flex flex-col sm:flex-row gap-4 w-full">
-                {candidats.map((candidat) => (
-                  <button
-                    key={candidat}
-                    onClick={() => vote(candidat)}
-                    disabled={hasVoted}
-                    className="flex-1 bg-[#0f172a] text-white border border-white/10 px-5 py-3 rounded-lg hover:bg-white hover:text-black transition cursor-pointer"
-                  >
-                    {candidat}
-                  </button>
-                ))}
-              </div>
-              <div>
-                <button
-                  onClick={getResults}
-                  className="bg-white mt-6 text-black text-lg font-medium px-6 py-3 rounded-xl hover:bg-gray-100 transition cursor-pointer"
-                >
-                  Voir les résultats
-                </button>
-              </div>
+              {(hasVoted || bNeedReset) && (
+                <PieChartResults results={resultats} />
+              )}
+              {!hasVoted && (
+                <>
+                  <h2 className="text-2xl mb-4">
+                    Les éléctions seront cloturés apres 2 votes.
+                  </h2>
+                  <div className="flex flex-col sm:flex-row gap-4 w-full">
+                    {candidats.map((candidat) => (
+                      <button
+                        key={candidat}
+                        onClick={() => vote(candidat)}
+                        disabled={hasVoted}
+                        className="flex-1 bg-[#0f172a] text-white border border-white/10 px-5 py-3 rounded-lg hover:bg-white hover:text-black transition cursor-pointer"
+                      >
+                        {candidat}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
               {bNeedReset && (
                 <div>
                   <button
                     onClick={resetVote}
-                    className="mt-4 bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-600 transition"
+                    className="mt-4 bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-600 transition  cursor-pointer"
                   >
                     Reset les votes
                   </button>

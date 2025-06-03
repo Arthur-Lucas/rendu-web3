@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { Contract, BrowserProvider } from "ethers";
-import SafeABI from "../abis/Safe.json";
+// import SafeABI from "../abis/Safe.json";
 
 const contractAddress = "0xYourContractAddressHere";
 
@@ -11,7 +11,7 @@ export default function Home() {
   const choices = ["Alice", "Bob"];
 
   const providerRef = useRef<BrowserProvider | null>(null);
-  const signerRef = useRef<any>(null);
+  const signerRef = useRef(null);
   const contractRef = useRef<Contract | null>(null);
 
   async function connectWallet() {
@@ -24,11 +24,11 @@ export default function Home() {
 
     const provider = new BrowserProvider(window.ethereum);
     const signer = await provider.getSigner();
-    const contract = new Contract(contractAddress, SafeABI.abi, signer);
+    // const contract = new Contract(contractAddress, SafeABI.abi, signer);
 
-    providerRef.current = provider;
-    signerRef.current = signer;
-    contractRef.current = contract;
+    // providerRef.current = provider;
+    // signerRef.current = signer;
+    // contractRef.current = contract;
 
     setIsConnected(true);
   }
@@ -67,7 +67,7 @@ export default function Home() {
       </div>
         <footer className="text-sm text-gray-400 py-10 bg-black flex flex-col items-center">
           <p>Votez pour votre candidat préféré !</p>
-          <p>Powered by Arthurito, Matou & Pierro(t)</p>
+          <p>Powered by <a href="https://github.com/Arthur-Lucas">Arthurito</a> , <a href="https://github.com/matdn">Matou</a>  & <a href="https://github.com/Pierrooooo">Pierro(t)</a> </p>
         </footer>
     </div>
   );
